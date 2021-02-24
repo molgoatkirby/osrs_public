@@ -8,7 +8,7 @@ using namespace std;
 #include <random>
 
 bool ely = false;
-bool splash = false;
+bool splash = false; 
 int dwhMax = 78; int scytheMax = 48; int sangMax = 47; int maxTbow = 79;
 int dwhA = 192; int scytheA = 139; int sangA = 143; int sangPrimHelm = 134; int tbowA = 170;
 int dwhABandos = 160; int scytheABandos = 147;
