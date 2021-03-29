@@ -10,17 +10,17 @@ using namespace std;
 
 bool splash = false;
 
-int dwhMax = 78; int dwhMaxBandos = 78; int dwhMaxcm = 76; 
-int scytheMax = 48; int scytheMaxBandos = 48; int scytheMaxcm = 46; 
-int lanceMax = 58; int lanceMaxBandos = 58; int lanceMaxcm = 56;
-int sangMax = 47; int sangMaxBandos = 47; int sangMaxcm = 47; 
-int tbowMax = 79; int tbowMaxBandos = 79; int tbowMaxcm = 91;
+int dwhMax = 78; int dwhMaxBandos = 78; int dwhMaxcm = 76; int dwhMaxCustom = 75;
+int scytheMax = 48; int scytheMaxBandos = 48; int scytheMaxcm = 46; int scytheMaxCustom = 47;
+int lanceMax = 58; int lanceMaxBandos = 58; int lanceMaxcm = 56; int lanceMaxCustom = 56;
+int sangMax = 47; int sangMaxBandos = 47; int sangMaxcm = 47; int sangMaxCustom = 47;
+int tbowMax = 79; int tbowMaxBandos = 79; int tbowMaxcm = 91; int tbowMaxCustom = 79;
 
-int dwhA = 192; int dwhABandos = 172; int dwhAcm = 191;
-int scytheA = 139; int scytheABandos = 147; int scytheAcm = 138;
-int lanceA = 162; int lanceABandos = 149; int lanceAcm = 161; 
-int sangA = 143; int sangABandos = 143; int sangAcm = 152;
-int tbowA = 170; int tbowABandos = 170; int tbowAcm = 177; 
+int dwhA = 192; int dwhABandos = 172; int dwhAcm = 191;	int dwhACustom = 157;
+int scytheA = 139; int scytheABandos = 147; int scytheAcm = 138; int scytheACustom = 144;
+int lanceA = 162; int lanceABandos = 149; int lanceAcm = 161; int lanceACustom = 149;
+int sangA = 143; int sangABandos = 143; int sangAcm = 152; int sangACustom = 143;
+int tbowA = 170; int tbowABandos = 170; int tbowAcm = 177; int tbowACustom = 170;
 
 int olmCrushDef = 0; int olmSlashDef = 0; int olmMageDef = 0;
 int counts = 0;
@@ -198,7 +198,7 @@ npcOlm fightOlm(gear myGear, bool scythe, bool cmRaid){
 		olm.mageOlm(myGear.accSang, myGear.maxSang, myGear.brim); }
 
 	while (olm.meleeHP > 0) {
-		if (dwh + olm.ticks - dwhPrevSpec >= 300) {
+		if (dwh + olm.ticks - dwhPrevSpec >= 300 && olm.meleeHP > 200) {
 			olm.dwhHit(myGear.accDWH, myGear.maxDWH);
 			dwh -= 250;
 			dwhPrevSpec = olm.ticks;
@@ -230,30 +230,42 @@ int main() {
 	int accDWH = calcAD(dwhA, 120*1.2+3,1.025);
 	int accDWHBandos = calcAD(dwhABandos, 120*1.2+3,1.005);
 	int accDWHcm = calcAD(dwhAcm, 120*1.2+3,1.025);
+	int accDWHCustom = calcAD(dwhACustom, 120*1.2+3,1);
+
 	int accScythe = calcAD(scytheA,120*1.2,1);
 	int accScytheBandos = calcAD(scytheABandos, 120*1.2,1);
 	int accScythecm = calcAD(scytheAcm, 120*1.2,1);
+	int accScytheCustom = calcAD(scytheACustom, 120*1.2,1);
+
 	int accLance = calcAD(lanceA, 120*1.2, 1.23);
 	int accLanceBandos = calcAD(lanceABandos, 120*1.2, 1.2);
 	int accLancecm = calcAD(lanceAcm, 120*1.2, 1.23);
+	int accLanceCustom = calcAD(lanceACustom, 120*1.2, 1.2);
+
 	int accSang = calcAD(sangA, 120*1.25+3, 1);
 	int accSangBandos = calcAD(sangABandos, 120*1.25+3, 1);
 	int accSangcm = calcAD(sangAcm, 120*1.25+3, 1);
+	int accSangCustom = calcAD(sangACustom, 120*1.25+3, 1);
+
 	int accTbow = calcAD(tbowA, 120*1.2,1.4);
 	int accTbowBandos = calcAD(tbowABandos, 120*1.2,1.4);
 	int accTbowcm = calcAD(tbowAcm, 120*1.2,1.4);
+	int accTbowCustom = calcAD(tbowACustom, 120*1.2, 1.4);
+
 	cout << "dwh accuracy is: " << accDWH << endl;
 	gear bandosNormal;
 	gear inquiNormal;
 	gear inquiCM;
+	gear custom;
 
-	bandosNormal.init(accDWH,dwhMax,accLance,lanceMax,accScythe,scytheMax,accSang,sangMax,accTbow,tbowMax,false);
-	inquiNormal.init(accDWHBandos,dwhMaxBandos,accLanceBandos,lanceMaxBandos,accScytheBandos,scytheMaxBandos,accSangBandos,sangMaxBandos,accTbowBandos,tbowMaxBandos,false);
+	inquiNormal.init(accDWH,dwhMax,accLance,lanceMax,accScythe,scytheMax,accSang,sangMax,accTbow,tbowMax,false);
+	bandosNormal.init(accDWHBandos,dwhMaxBandos,accLanceBandos,lanceMaxBandos,accScytheBandos,scytheMaxBandos,accSangBandos,sangMaxBandos,accTbowBandos,tbowMaxBandos,false);
 	inquiCM.init(accDWHcm,dwhMaxcm,accLancecm,lanceMaxcm,accScythecm,scytheMaxcm,accSangcm,sangMaxcm,accTbowcm,tbowMaxcm,true);
+	custom.init(accDWHCustom,dwhMaxCustom,accLanceCustom,lanceMaxCustom,accScytheCustom,scytheMaxCustom,accSangCustom,sangMaxCustom,accTbowCustom,tbowMaxCustom,false);
 
 	//tracking variables
 	int sub800 = 0; int sub800Bandos = 0;
-	int sub790 = 0; int sub790Bandos = 0;
+	int sub850 = 0; int sub850Bandos = 0;
 	int subTest = 0; int subTestBandos = 0; string subTestText = " sub 9:00. "; int subTestVal = 900;
 	int ticks = 0;
 	int ticksBandos = 0;
@@ -265,15 +277,15 @@ int main() {
 
 	try {
 		ofstream resultFile;
-		resultFile.open("olmsims.csv");
+		resultFile.open("olmsimBandosLance.csv");
 		resultFile << "Ticks,Seconds,M:SS\n";
 		int loops = 100000;
 
 		for (int x = 0; x < loops; x++) {
-			result = fightOlm(inquiCM, false,true); // for lance
-			//resultFile << result.ticks << "," << result.ticks * 0.6 << "," << ticksToTime(result.ticks) << "\n";
+			result = fightOlm(bandosNormal, false,false); // for lance
+			resultFile << result.ticks << "," << result.ticks * 0.6 << "," << ticksToTime(result.ticks) << "\n";
 			if (result.ticks < 800) sub800++;
-			if (result.ticks <= 790) sub790++;
+			if (result.ticks <= 850) sub850++;
 			if (result.ticks < subTestVal) subTest++;
 			ticks += result.ticks;
 			if (result.ticks < fastest) fastest = result.ticks;
@@ -281,7 +293,7 @@ int main() {
 			//result = fightOlm(accDWHBandos, accScytheBandos, accSang, accTbow, useScythe); // for scythe
 			result = fightOlm(bandosNormal, true, false); // for lance
 			if (result.ticks < 800) sub800Bandos++;
-			if (result.ticks <= 790) sub790Bandos++;
+			if (result.ticks <= 850) sub850Bandos++;
 			if (result.ticks < subTestVal) subTestBandos++;
 			ticksBandos += result.ticks;
 			if (result.ticks < fastestBandos) fastestBandos = result.ticks;
@@ -290,10 +302,10 @@ int main() {
 
 		cout << loops << " olm fights." << endl << endl;
 
-		cout << "Inquisitor: CM" << endl;
+		cout << "Olm inquisitor regular lance:" << endl;
 		cout << subTest << subTestText << 100*(double)(subTest)/loops << "%." << endl;
 		cout << sub800 << " sub 8:00s. " << 100*(double)(sub800)/loops << "%." << endl;
-		cout << sub790 << " sub 7:55s. " << 100*(double)(sub790)/loops << "%." << endl;
+		cout << sub850 << " sub 8:30s. " << 100*(double)(sub850)/loops << "%." << endl;
 		cout << 0.6*ticks/loops << " average seconds per olm. " << ticksToTime(ticks/loops) << endl;
 		cout << "Fastest run was: " << ticksToTime(fastest) << "." << endl;
 
