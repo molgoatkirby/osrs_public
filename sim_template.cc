@@ -435,9 +435,9 @@ int main() {
 			/*for (int x = 300; x <= 700; x += 10) {
 				resultFile << 100*(double)partialWinsFrost[x]/loops << ",";
 			}*/
-			cout << totalWins << endl;
+			//cout << totalWins << endl;
 			//resultFile << 100*(double)totalWins/loops << ",";
-			totalWins = 0;
+			//totalWins = 0;
 		//}
 		//resultFile << "\n";
 
