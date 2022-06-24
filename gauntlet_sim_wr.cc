@@ -97,9 +97,10 @@ struct gear {
 	gear() {
 		if (corrupt) {
 			redempsLeft = 8;
-			redempThresh = 10;
+			redempThresh = 14;
 			auguryDef = calcAD(0,99*1.25,1);
 			rigourDef = calcAD(0,99*(1.25*0.3 +0.7),1);
+			cout << "test" << endl;
 		} else 	{
 			redempsLeft = 1;
 			redempThresh = 12;
@@ -251,7 +252,7 @@ struct npcBoss {
 			meleeAtk = calcAD(equipMeleeAtk,curAtk+1,1);
 			magicAtk = calcAD(equipMagicAtk,curMag+1,1);
 			rangeAtk = calcAD(equipRangeAtk,curRng+1,1);
-			bossMax = 13;
+			bossMax = 16;
 		}
 	}
 
@@ -693,7 +694,7 @@ int main() {
 	if (corrupt) tickLoss = 5;
 	else tickLoss = 5;
 	normalGear.setWeapons(1,3,punch); //magic, range, melee, 4 naked punch, 5 armour punch, 6 naked sceptre
-	bool foodTest = 4;
+	int foodTest = 8;
 
 	//tracking variables
 	/* USE THIS IF YOU"RE OK WItH A MAX TEST SIZE OF 20,000.
