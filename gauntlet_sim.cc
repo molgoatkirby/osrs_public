@@ -166,8 +166,8 @@ struct gear {
 	int redempThresh = 13; // if above this hp, go for redemp, if below tick eat
 	int hitDelay = 1;
 
-	int auguryDef;
-	int rigourDef;
+	int auguryDef; //ranged/magic def roll with augury, ranged def roll with rigour/piety
+	int rigourDef; //magic def roll with rigour/piety
 	int curMageDef;
 	int curRangeDef;
 	int incomingHitDelay;
@@ -178,16 +178,17 @@ struct gear {
 	int rangeACC = 0; int rangeMAX = 0;
 
 	gear() {
+		int mageDefLvl = floor(99*1.25*0.3) + floor(99*.7);
 		if (corrupt) {
 			redempsLeft = 3;
 			redempThresh = 13;
 			auguryDef = calcAD(166,99*1.25,1);
-			rigourDef = calcAD(166,99*(1.25*0.3 +0.7),1);
+			rigourDef = calcAD(166,mageDefLvl,1);
 		} else 	{
 			redempsLeft = 1;
 			redempThresh = 12;
 			auguryDef = calcAD(0,99*1.25,1);
-			rigourDef = calcAD(0,99*(1.25*0.3 +0.7),1);
+			rigourDef = calcAD(0,mageDefLvl,1);
 		}
 		curMageDef = rigourDef; curMageDef = auguryDef;
 		curRangeDef = auguryDef;
@@ -268,6 +269,18 @@ struct gear {
 
 	}
 
+	void setDefPrayers(string attackStyle) {
+		//auguryDef is the player def roll for ranged def with any
+		//prayer and magic def with augury
+		//rigourDef is the player def roll for magic def with piety/rigour
+		if (attackStyle == "magic") {
+			curMageDef = auguryDef;
+			curRangeDef = auguryDef;
+		} else {
+			curMageDef = rigourDef;
+			curRangeDef = auguryDef;
+		}
+	}
 
 };
 
@@ -319,7 +332,7 @@ struct npcBoss {
 	bool redempNado = true;
 	bool redemp = true;
 	bool nado = false;
-	int nadoDelay = 6; //seems to be 4-8 usually, but seen as high as 10
+	int nadoDelay = 6*5; //seems to be 4-8 usually, but seen as high as 10
 	bool playerAlive = true;
 	int prayerStart = 0;
 	string prayer = "test";
@@ -348,6 +361,11 @@ struct npcBoss {
 		else if(style == "melee") defenceValue = crushDef; // assuming all are the same
 		else throw "Unknown style for hitBoss";
 		curHp -= hit(accuracy, defenceValue, max);
+	}
+
+	void hitBossAndSetStyle(gear& myGear, int accuracy, int max, string style) {
+		hitBoss(accuracy, max, style);
+		myGear.setDefPrayers(style);
 	}
 
 	void randomizePrayer() {
@@ -439,13 +457,13 @@ struct npcBoss {
 	void updateDelay(){
 		hitDelay--;
 		nadoDelay--;
-		if (nadoDelay == 7) nado = false;
+		if (nadoDelay <= 7*5) nado = false;
 	}
 
 	void hitPlayer(gear& myGear) {
-		if (nadoDelay == 0) {
+		if (nadoDelay <= 0) {
 			nado = true;
-			nadoDelay = 11;
+			nadoDelay = 11*5;
 		} else if (hitCount%8 < 4) {
 			myGear.addHit(hit(rangeAtk,myGear.curRangeDef,bossMax),1);
 			//hitDelay = 4;
@@ -464,27 +482,27 @@ struct npcBoss {
 			prayerCount++;
 			if (prayer == "magic") {
 				if (prayerCount == 6) {
-					hitBoss(myGear.rangeACC, myGear.rangeMAX, "range");
+					hitBossAndSetStyle(myGear, myGear.rangeACC, myGear.rangeMAX, "range");
 					prayer = "range";
 					prayerCount = 0;
 				} else {
-					hitBoss(myGear.rangeACC, myGear.rangeMAX,"range");
+					hitBossAndSetStyle(myGear, myGear.rangeACC, myGear.rangeMAX,"range");
 				}
 			} else if (prayer == "range") {
 				if (prayerCount == 6) {
-					hitBoss(myGear.meleeACC, myGear.meleeMAX, "melee");
+					hitBossAndSetStyle(myGear, myGear.meleeACC, myGear.meleeMAX, "melee");
 					prayer = "melee";
 					prayerCount = 0;
 				} else {
-					hitBoss(myGear.magicACC, myGear.magicMAX,"magic");
+					hitBossAndSetStyle(myGear, myGear.magicACC, myGear.magicMAX,"magic");
 				}
 			} else if (prayer == "melee") {
 				if (prayerCount == 6) {
-					hitBoss(myGear.rangeACC, myGear.rangeMAX, "range");
+					hitBossAndSetStyle(myGear, myGear.rangeACC, myGear.rangeMAX, "range");
 					prayer = "range";
 					prayerCount = 0;
 				} else {
-					hitBoss(myGear.magicACC, myGear.magicMAX,"magic");
+					hitBossAndSetStyle(myGear, myGear.magicACC, myGear.magicMAX,"magic");
 				}
 			}
 		}
@@ -505,27 +523,27 @@ struct npcBoss {
 			prayerCount++;
 			if (prayer == "magic") {
 				if (prayerCount == 6) {
-					hitBoss(myGear.meleeACC, myGear.meleeMAX, "melee");
+					hitBossAndSetStyle(myGear, myGear.meleeACC, myGear.meleeMAX, "melee");
 					prayer = "melee";
 					prayerCount = 0;
 				} else {
-					hitBoss(myGear.rangeACC, myGear.rangeMAX,"range");
+					hitBossAndSetStyle(myGear, myGear.rangeACC, myGear.rangeMAX,"range");
 				}
 			} else if (prayer == "range") {
 				if (prayerCount == 6) {
-					hitBoss(myGear.magicACC, myGear.magicMAX, "magic");
+					hitBossAndSetStyle(myGear, myGear.magicACC, myGear.magicMAX, "magic");
 					prayer = "magic";
 					prayerCount = 0;
 				} else {
-					hitBoss(myGear.magicACC, myGear.magicMAX,"magic");
+					hitBossAndSetStyle(myGear, myGear.magicACC, myGear.magicMAX,"magic");
 				}
 			} else if (prayer == "melee") {
 				if (prayerCount == 6) {
-					hitBoss(myGear.magicACC, myGear.magicMAX, "magic");
+					hitBossAndSetStyle(myGear, myGear.magicACC, myGear.magicMAX, "magic");
 					prayer = "magic";
 					prayerCount = 0;
 				} else {
-					hitBoss(myGear.rangeACC, myGear.rangeMAX,"range");
+					hitBossAndSetStyle(myGear, myGear.rangeACC, myGear.rangeMAX,"range");
 				}
 			}
 		}
@@ -545,27 +563,27 @@ struct npcBoss {
 			prayerCount++;
 			if (prayer == "magic") {
 				if (prayerCount == 6) {
-					hitBoss(myGear.meleeACC, myGear.meleeMAX, "melee");
+					hitBossAndSetStyle(myGear, myGear.meleeACC, myGear.meleeMAX, "melee");
 					prayer = "melee";
 					prayerCount = 0;
 				} else {
-					hitBoss(myGear.meleeACC, myGear.meleeMAX,"melee");
+					hitBossAndSetStyle(myGear, myGear.meleeACC, myGear.meleeMAX,"melee");
 				}
 			} else if (prayer == "range") {
 				if (prayerCount == 6) {
-					hitBoss(myGear.magicACC, myGear.magicMAX, "magic");
+					hitBossAndSetStyle(myGear, myGear.magicACC, myGear.magicMAX, "magic");
 					prayer = "magic";
 					prayerCount = 0;
 				} else {
-					hitBoss(myGear.meleeACC, myGear.meleeMAX,"melee");
+					hitBossAndSetStyle(myGear, myGear.meleeACC, myGear.meleeMAX,"melee");
 				}
 			} else if (prayer == "melee") {
 				if (prayerCount == 6) {
-					hitBoss(myGear.magicACC, myGear.magicMAX, "magic");
+					hitBossAndSetStyle(myGear, myGear.magicACC, myGear.magicMAX, "magic");
 					prayer = "magic";
 					prayerCount = 0;
 				} else {
-					hitBoss(myGear.magicACC, myGear.magicMAX,"magic");
+					hitBossAndSetStyle(myGear, myGear.magicACC, myGear.magicMAX,"magic");
 				}
 			}
 		}
@@ -585,27 +603,27 @@ struct npcBoss {
 			prayerCount++;
 			if (prayer == "magic") {
 				if (prayerCount == 6) {
-					hitBoss(myGear.rangeACC, myGear.rangeMAX, "range");
+					hitBossAndSetStyle(myGear, myGear.rangeACC, myGear.rangeMAX, "range");
 					prayer = "range";
 					prayerCount = 0;
 				} else {
-					hitBoss(myGear.rangeACC, myGear.rangeMAX,"range");
+					hitBossAndSetStyle(myGear, myGear.rangeACC, myGear.rangeMAX,"range");
 				}
 			} else if (prayer == "range") {
 				if (prayerCount == 6) {
-					hitBoss(myGear.magicACC, myGear.magicMAX, "magic");
+					hitBossAndSetStyle(myGear, myGear.magicACC, myGear.magicMAX, "magic");
 					prayer = "magic";
 					prayerCount = 0;
 				} else {
-					hitBoss(myGear.magicACC, myGear.magicMAX,"magic");
+					hitBossAndSetStyle(myGear, myGear.magicACC, myGear.magicMAX,"magic");
 				}
 			} else if (prayer == "melee") {
 				if (prayerCount == 6) {
-					hitBoss(myGear.magicACC, myGear.magicMAX, "magic");
+					hitBossAndSetStyle(myGear, myGear.magicACC, myGear.magicMAX, "magic");
 					prayer = "magic";
 					prayerCount = 0;
 				} else {
-					hitBoss(myGear.rangeACC, myGear.rangeMAX,"range");
+					hitBossAndSetStyle(myGear, myGear.rangeACC, myGear.rangeMAX,"range");
 				}
 			}
 		}
@@ -765,9 +783,9 @@ int main() {
 	int accCbow3 = calcAD(cbow3A,99*1.2,1);
 
 	//melee accuracy rolls
-	int accLance   = calcAD(lanceA,  120*1.2,1.2);
-	int accWhip    = calcAD(whipA,   120*1.2,1);
-	int accTent    = calcAD(tentA,   120*1.2,1);
+	int accLance   = calcAD(lanceA,  99*1.2,1); //punch naked
+	int accWhip    = calcAD(whipA,   99*1.2,1); //punch armour
+	int accTent    = calcAD(tentA,   99*1.2,1); //scepter naked
 	int accSaeldor = calcAD(saeldorA,120*1.2,1);
 	int accScythe  = calcAD(scytheA, 120*1.2,1);
 	int accClaws   = calcAD(clawsA,  120*1.2,1);
