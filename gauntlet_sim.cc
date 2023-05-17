@@ -765,9 +765,9 @@ int main() {
 	int accCbow3 = calcAD(cbow3A,99*1.2,1);
 
 	//melee accuracy rolls
-	int accLance   = calcAD(lanceA,  120*1.2,1.2);
-	int accWhip    = calcAD(whipA,   120*1.2,1);
-	int accTent    = calcAD(tentA,   120*1.2,1);
+	int accLance   = calcAD(lanceA,  99*1.2,1); //punch naked
+	int accWhip    = calcAD(whipA,   99*1.2,1); //punch armour
+	int accTent    = calcAD(tentA,   99*1.2,1); //scepter naked
 	int accSaeldor = calcAD(saeldorA,120*1.2,1);
 	int accScythe  = calcAD(scytheA, 120*1.2,1);
 	int accClaws   = calcAD(clawsA,  120*1.2,1);
