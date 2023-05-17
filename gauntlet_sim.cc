@@ -319,7 +319,7 @@ struct npcBoss {
 	bool redempNado = true;
 	bool redemp = true;
 	bool nado = false;
-	int nadoDelay = 6; //seems to be 4-8 usually, but seen as high as 10
+	int nadoDelay = 6*5; //seems to be 4-8 usually, but seen as high as 10
 	bool playerAlive = true;
 	int prayerStart = 0;
 	string prayer = "test";
@@ -439,13 +439,13 @@ struct npcBoss {
 	void updateDelay(){
 		hitDelay--;
 		nadoDelay--;
-		if (nadoDelay == 7) nado = false;
+		if (nadoDelay <= 7*5) nado = false;
 	}
 
 	void hitPlayer(gear& myGear) {
-		if (nadoDelay == 0) {
+		if (nadoDelay <= 0) {
 			nado = true;
-			nadoDelay = 11;
+			nadoDelay = 11*5;
 		} else if (hitCount%8 < 4) {
 			myGear.addHit(hit(rangeAtk,myGear.curRangeDef,bossMax),1);
 			//hitDelay = 4;
