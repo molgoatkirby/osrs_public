@@ -10,6 +10,7 @@ using namespace std;
 #include <random>
 
 bool splash = false;
+double avgMelee = 0; double avgPillar = 0;
 
 int counts = 0;
 random_device rd;
@@ -181,6 +182,7 @@ struct npcBoss {
 	bool scytheFinish = false;
 	bool overkill = true; // overkill true cause only false if scythe finish and scythe doesn't get overkill
 	int huskP1 = 0;
+	int huskMelee = 0;
 
 	void hitBoss(int accuracy, int max, string style) {
 		int defenceValue = 0;
@@ -212,11 +214,11 @@ struct npcBoss {
 	}	
 
 	void updateDef() {
-		int stabDef  = calcAD(equipStabDef,curDef+1,1);
-		int slashDef = calcAD(equipSlashDef,curDef+1,1);
-		int crushDef = calcAD(equipCrushDef,curDef+1,1);
-		int magicDef = calcAD(equipMagicDef,curMag+1,1);
-		int rangeDef = calcAD(equipRangeDef,curDef+1,1);
+		stabDef  = calcAD(equipStabDef,curDef+1,1);
+		slashDef = calcAD(equipSlashDef,curDef+1,1);
+		crushDef = calcAD(equipCrushDef,curDef+1,1);
+		magicDef = calcAD(equipMagicDef,curMag+1,1);
+		rangeDef = calcAD(equipRangeDef,curDef+1,1);
 	}
 
 	int rubyBoss(int accuracy, int max) {
@@ -296,9 +298,13 @@ struct npcBoss {
 	}
 
 	void bpPillar(int pNum) {
-		p[pNum] -= getRandom(1,29);
-		ticks += 2;
-		thrallPillar(2);
+		if (p[pNum] > 150) {
+			p[pNum] = 0; ticks += 4;
+		} else {
+			p[pNum] -= getRandom(1,27);
+			ticks += 2;
+			thrallPillar(2);
+		}
 	}
 
 	void shadowPillar(int pNum) {
@@ -434,7 +440,7 @@ struct npcBoss {
 		while (curHp > 0) {
 			scytheBoss(myGear.accScythe, myGear.maxScythe);
 		}
-		huskP1 = ticks - 4;
+		huskMelee = ticks - 4;
 		pillarPhase();
 		huskP1 = ticks - 4;
 	}
@@ -463,13 +469,15 @@ npcBoss fightBossReset(gear myGear, int hp, string phase){
 
 npcBoss fightBoss(gear myGear){
 	npcBoss boss;
-	boss.curHp -= 88;
-	boss.ticks += 5;
+	//boss.curHp -= 88;
+	//boss.ticks += 5;
 
 	
 
 	boss.huskPhase(myGear);
-	if (boss.huskP1 > (50+75)) {
+	avgMelee += boss.huskMelee;
+	avgPillar += boss.huskP1 - boss.huskMelee;
+	if (boss.huskMelee > (61)) {
 		boss.ticks = 10000;
 		goto ripRun;
 	}
@@ -518,15 +526,15 @@ int main() {
 	int whipA    = 0;		int whipMax    = 0;
 	int tentA    = 0;		int tentMax    = 0;
 	int saeldorA = 0;		int saeldorMax = 0;
-	int scytheA  = 94+5;		int scytheMax  = 48;
+	int scytheA  = 94+5;		int scytheMax  = 49;
 	int clawsA   = 0; 		int clawsMax   = 0;
 	int bgsA     = 0;		int bgsMax     = 0;
 	int ddsA     = 0;		int ddsMax     = 0;
 	int challyA  = 0;		int challyMax  = 0;
 	int dharokA  = 0;		int dharokMax  = 0;
 	int dwhA     = 0;		int dhwMax     = 0;
-	int korasiA  = 133;		int korasiMax  = 50; // 50, 52 in torva
-	int dinhsA	 = 193;		int dinhsMax   = 38; // 37+ + 188, 48 + 161 torva+torture, 38+193 torture tech
+	int korasiA  = 133;		int korasiMax  = 53; // 50, 52 in torva
+	int dinhsA	 = 193-20;		int dinhsMax   = 44; // 37+ + 188, 48 + 161 torva+torture, 38+193 torture tech
 
 	//mage
 	int sangA  = 0;		int sangMax  = 0;
@@ -534,7 +542,7 @@ int main() {
 	int bloodA = 0;		int bloodMax = 0;
 	int surgeA = 0;		int surgeMax = 0;
 	int volA   = 0;		int volMax   = 0;
-	int shadowA= 411;	int shadowMax= 64;
+	int shadowA= 411;	int shadowMax= 66;
 
 	//range accuracy rolls
 	int accBP   = calcAD(bpA,  112*1.2,1);
@@ -558,7 +566,7 @@ int main() {
 	int accDharok  = calcAD(dharokA, 120*1.2,1);
 	int accDWH     = calcAD(dwhA,    120*1.2,1);
 	int accKorasi  = calcAD(korasiA, 118*1.2,1);
-	int accDinhs   = calcAD(dinhsA,  118*1.2,1.025);
+	int accDinhs   = calcAD(dinhsA,  118*1.2,1.0);
 
 	//mage accuracy rolls
 	int accSang  = calcAD(sangA, 109*1.25,1);
@@ -614,19 +622,20 @@ int main() {
 		for (int i = 300; i <= 700; i += 10) resultFile << i << ",";
 		resultFile << "\n";
 		*/
-		int loops = 500000;
+		int loops = 200000;
 		int totalWins = 0;
 		int skippedRuns = 0;
 
 		for (int y = 0; y < loops; y++) {
 			result = fightBoss(normalGear);
-			if (result.ticks < 598) totalWins++;
+			if (result.ticks < 620) totalWins++;
 			if (result.ticks == 10000) skippedRuns++;
 		}	
 
 		cout << loops << " boss fights." << endl << endl;
-		cout << totalWins << " total wins out of " << loops << " fights. " << 100*(double)totalWins/loops << "% win rate." << endl;
-		cout << "1 in " << (double)loops / totalWins << " chance of winning." << endl;
+		cout << totalWins << " total wins out of " << loops << " fights. " << 100*(double)totalWins/(loops) << "% win rate." << endl;
+		cout << "1 in " << (double)(loops) / totalWins << " chance of winning." << endl;
+		cout << "Average melee: " << avgMelee / loops << ". Average pillar: " << avgPillar / loops << endl;
 		//cout << subTest << subTestText << 100*(double)(subTest)/loops << "%." << endl;
 		cout << "skipped runs: " << skippedRuns << endl;
 		cout << endl;
